@@ -7,6 +7,7 @@ import { deskApi } from '../../core/api/desk.api';
 import { portalApi } from '../../core/api/portal.api';
 import { BranchView, SearchType, TitleResult } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
+import { DebouncedSearch, watchDebouncedSearch } from '../../helpers/debounced-search';
 import { isDesk, isMember } from '../../store/auth.store';
 import { contextMember, refreshMemberContext } from '../../store/member-context.store';
 import { notifySuccess } from '../../store/notify.store';
@@ -35,9 +36,9 @@ import { PageHeader } from '../../ui/page-header';
       <app-page-header eyebrow="Northwick libraries" title="Catalogue" subtitle="Search by title, author or ISBN and see what is on the shelf at every branch." />
       <form class="searchbar" (ngSubmit)="search()">
         <app-icon name="search" />
-        <input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" data-testid="catalogue-query"
+        <input name="q" [ngModel]="query()" (ngModelChange)="onQueryChange($event)" data-testid="catalogue-query"
                placeholder="Title, author or ISBN" aria-label="Search" />
-        <select name="type" [ngModel]="type()" (ngModelChange)="type.set($event)" aria-label="Search in">
+        <select name="type" [ngModel]="type()" (ngModelChange)="onTypeChange($event)" aria-label="Search in">
           <option value="ALL">Everything</option>
           <option value="TITLE">Title</option>
           <option value="AUTHOR">Author</option>
@@ -124,11 +125,18 @@ export class CataloguePage {
     await this.finder.run();
   });
 
+  private readonly auto: DebouncedSearch;
+
   constructor() {
+    this.auto = watchDebouncedSearch(
+      () => [this.query(), this.type()],
+      () => this.applySearch(),
+    );
     effect(() => {
       const fromUrl = this.q();
       if (fromUrl) {
         untracked(() => {
+          this.auto.suppressNext();
           this.query.set(fromUrl);
           this.type.set('ALL');
           void this.finder.run();
@@ -138,7 +146,27 @@ export class CataloguePage {
     catalogueApi.branches().then((list) => this.branches.set(list)).catch(() => this.branches.set([]));
   }
 
+  protected onQueryChange(value: string): void {
+    this.query.set(value);
+    this.auto.notify();
+  }
+
+  protected onTypeChange(value: SearchType): void {
+    this.type.set(value);
+    this.auto.notify();
+  }
+
   protected search(): void {
+    this.auto.cancelPending();
+    this.applySearch();
+  }
+
+  private applySearch(): void {
+    if (!this.query().trim()) {
+      this.results.set([]);
+      this.searched.set(false);
+      return;
+    }
     void this.finder.run();
   }
 

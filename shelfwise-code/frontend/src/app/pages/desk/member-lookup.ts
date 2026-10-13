@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { deskApi } from '../../core/api/desk.api';
 import { MemberSummary } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
+import { DebouncedSearch, watchDebouncedSearch } from '../../helpers/debounced-search';
 import { CATEGORY_LABEL } from '../../helpers/labels';
 import { selectMember } from '../../store/member-context.store';
 import { ErrorMessage } from '../../shared/error-message';
@@ -23,7 +24,7 @@ const CARD_NUMBER = /^NPL\d+$/i;
     <form class="row" (ngSubmit)="search()">
       <mat-form-field class="query">
         <mat-label>Card number or name</mat-label>
-        <input matInput name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" data-testid="member-query" autofocus />
+        <input matInput name="q" [ngModel]="query()" (ngModelChange)="onQueryChange($event)" data-testid="member-query" autofocus />
       </mat-form-field>
       <button mat-flat-button type="submit" [disabled]="finder.loading()" data-testid="member-search">Find member</button>
     </form>
@@ -72,7 +73,30 @@ export class MemberLookup {
     }
   });
 
+  private readonly auto: DebouncedSearch;
+
+  constructor() {
+    this.auto = watchDebouncedSearch(
+      () => this.query(),
+      () => this.applySearch(),
+    );
+  }
+
+  protected onQueryChange(value: string): void {
+    this.query.set(value);
+    this.auto.notify();
+  }
+
   protected search(): void {
+    this.auto.cancelPending();
+    this.applySearch();
+  }
+
+  private applySearch(): void {
+    if (!this.query().trim()) {
+      this.results.set([]);
+      return;
+    }
     void this.finder.run();
   }
 

@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { catalogueApi } from '../../core/api/catalogue.api';
 import { BranchView, TitleResult } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
+import { DebouncedSearch, watchDebouncedSearch } from '../../helpers/debounced-search';
 import { ErrorMessage } from '../../shared/error-message';
 import { TitleResultCard } from '../../shared/title-result-card';
 import { CopyAdmin } from './copy-admin';
@@ -24,7 +25,7 @@ import { PageHeader } from '../../ui/page-header';
       <form class="row" (ngSubmit)="search()">
         <mat-form-field class="query">
           <mat-label>Search titles</mat-label>
-          <input matInput name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" data-testid="maintenance-query" />
+          <input matInput name="q" [ngModel]="query()" (ngModelChange)="onQueryChange($event)" data-testid="maintenance-query" />
         </mat-form-field>
         <button mat-flat-button type="submit" [disabled]="finder.loading()" data-testid="maintenance-search">Search</button>
         <button mat-stroked-button type="button" (click)="startCreate()" data-testid="new-title">New title</button>
@@ -62,15 +63,28 @@ export class TitleMaintenancePage {
     this.results.set(await catalogueApi.search(this.query().trim(), 'ALL'));
   });
 
+  private readonly auto: DebouncedSearch;
+
   constructor() {
+    this.auto = watchDebouncedSearch(
+      () => this.query(),
+      () => this.applySearch(),
+    );
     catalogueApi.branches().then((list) => this.branches.set(list)).catch(() => this.branches.set([]));
   }
 
+  protected onQueryChange(value: string): void {
+    this.query.set(value);
+    this.auto.notify();
+  }
+
   protected search(): void {
-    void this.finder.run();
+    this.auto.cancelPending();
+    this.applySearch();
   }
 
   protected reload(): void {
+    this.auto.cancelPending();
     void this.finder.run();
   }
 
@@ -80,12 +94,22 @@ export class TitleMaintenancePage {
 
   protected created(title: TitleResult): void {
     this.creating.set(false);
+    this.auto.suppressNext();
     this.query.set(title.title);
     void this.finder.run();
   }
 
   protected edited(): void {
     this.editingId.set(null);
+    this.auto.cancelPending();
+    void this.finder.run();
+  }
+
+  private applySearch(): void {
+    if (!this.query().trim()) {
+      this.results.set([]);
+      return;
+    }
     void this.finder.run();
   }
 }
