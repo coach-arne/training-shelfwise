@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { deskApi } from '../../core/api/desk.api';
 import { CheckoutReceipt, MemberDetail } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
+import { fillFromPickedBarcode } from '../../helpers/picked-barcode';
 import { contextMember, refreshMemberContext } from '../../store/member-context.store';
 import { ErrorMessage } from '../../shared/error-message';
 
@@ -19,7 +20,7 @@ import { ErrorMessage } from '../../shared/error-message';
     <form class="row" (ngSubmit)="checkout()">
       <mat-form-field>
         <mat-label>Copy barcode</mat-label>
-        <input matInput name="barcode" [ngModel]="barcode()" (ngModelChange)="barcode.set($event)" data-testid="checkout-barcode" />
+        <input matInput name="barcode" [value]="barcode()" (input)="barcode.set($any($event.target).value)" data-testid="checkout-barcode" />
       </mat-form-field>
       <button mat-flat-button type="submit" [disabled]="!barcode().trim() || action.loading()" data-testid="checkout-submit">Check out</button>
     </form>
@@ -40,6 +41,10 @@ import { ErrorMessage } from '../../shared/error-message';
 export class CheckoutPanel {
   protected readonly barcode = signal('');
   protected readonly receipt = signal<CheckoutReceipt | null>(null);
+
+  constructor() {
+    fillFromPickedBarcode(this.barcode);
+  }
 
   protected readonly action = createAction(async (member: MemberDetail) => {
     this.receipt.set(null);

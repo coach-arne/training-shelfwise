@@ -1,9 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { catalogueApi } from '../../core/api/catalogue.api';
 import { deskApi } from '../../core/api/desk.api';
@@ -18,6 +15,9 @@ import { CopyStatusChip } from '../../shared/copy-status-chip';
 import { ErrorMessage } from '../../shared/error-message';
 import { ReserveAction, ReserveRequest } from '../../shared/reserve-action';
 import { TitleResultCard } from '../../shared/title-result-card';
+import { EmptyState } from '../../ui/empty-state';
+import { Icon } from '../../ui/icon';
+import { PageHeader } from '../../ui/page-header';
 
 /**
  * The public catalogue (F-CAT-04): search by title, author or ISBN with availability per branch.
@@ -26,38 +26,33 @@ import { TitleResultCard } from '../../shared/title-result-card';
 @Component({
   selector: 'app-catalogue-page',
   imports: [
-    FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, RouterLink, CopyStatusChip,
-    ErrorMessage, ReserveAction, TitleResultCard,
+    FormsModule, MatButtonModule, RouterLink, CopyStatusChip, EmptyState, ErrorMessage, Icon, PageHeader, ReserveAction,
+    TitleResultCard,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Catalogue</h1>
-      <form class="row" (ngSubmit)="search()">
-        <mat-form-field class="query">
-          <mat-label>Search</mat-label>
-          <input matInput name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" data-testid="catalogue-query"
-                 placeholder="Title, author or ISBN" />
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Search in</mat-label>
-          <mat-select name="type" [value]="type()" (valueChange)="type.set($event)">
-            <mat-option value="ALL">Everything</mat-option>
-            <mat-option value="TITLE">Title</mat-option>
-            <mat-option value="AUTHOR">Author</mat-option>
-            <mat-option value="ISBN">ISBN</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <app-page-header eyebrow="Northwick libraries" title="Catalogue" subtitle="Search by title, author or ISBN and see what is on the shelf at every branch." />
+      <form class="searchbar" (ngSubmit)="search()">
+        <app-icon name="search" />
+        <input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" data-testid="catalogue-query"
+               placeholder="Title, author or ISBN" aria-label="Search" />
+        <select name="type" [ngModel]="type()" (ngModelChange)="type.set($event)" aria-label="Search in">
+          <option value="ALL">Everything</option>
+          <option value="TITLE">Title</option>
+          <option value="AUTHOR">Author</option>
+          <option value="ISBN">ISBN</option>
+        </select>
         <button mat-flat-button type="submit" [disabled]="finder.loading()" data-testid="catalogue-search">Search</button>
       </form>
 
       <app-error-message [error]="finder.error() ?? booking.error()" />
       @if (reservingFor(); as target) {
-        <div class="warning-box">Reservations made here are for <strong>{{ target }}</strong>.</div>
+        <div class="info-box">Reservations made here are for <strong>{{ target }}</strong>.</div>
       }
 
       @if (searched() && results().length === 0) {
-        <p class="empty" data-testid="no-results">Nothing found.</p>
+        <app-empty-state icon="search"><span data-testid="no-results">Nothing found. Try a shorter search.</span></app-empty-state>
       }
       @for (title of results(); track title.id) {
         <app-title-result-card [title]="title">
@@ -67,7 +62,7 @@ import { TitleResultCard } from '../../shared/title-result-card';
               <tbody>
                 @for (copy of copies; track copy.id) {
                   <tr>
-                    <td>{{ copy.barcode }}</td>
+                    <td class="mono">{{ copy.barcode }}</td>
                     <td>{{ copy.homeBranchCode }}</td>
                     <td>{{ copy.currentBranchCode }}@if (copy.destinationBranchCode) { → {{ copy.destinationBranchCode }} }</td>
                     <td><app-copy-status-chip [status]="copy.status" /></td>
@@ -86,9 +81,18 @@ import { TitleResultCard } from '../../shared/title-result-card';
       }
     </div>
   `,
-  styles: `.query { min-width: 320px; }`,
+  styles: `
+    .searchbar { display: flex; align-items: center; gap: var(--sw-space-3); padding: 6px 6px 6px var(--sw-space-4); margin-bottom: var(--sw-space-4);
+                 background: var(--sw-color-surface); border: 1px solid var(--sw-color-line-strong); border-radius: var(--sw-radius-pill); box-shadow: var(--sw-shadow-card); color: var(--sw-color-muted); }
+    .searchbar:focus-within { border-color: var(--sw-color-accent); box-shadow: 0 0 0 3px var(--sw-color-accent-soft); }
+    .searchbar input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: var(--sw-color-ink); }
+    .searchbar select { border: 0; border-left: 1px solid var(--sw-color-line); padding: 6px 8px 6px var(--sw-space-3); background: transparent; font: inherit; font-size: 14px; color: var(--sw-color-muted); outline: 0; cursor: pointer; }
+  `,
 })
 export class CataloguePage {
+  /** `?q=` from the URL (for instance from the training kit) is searched straight away. */
+  readonly q = input<string>();
+
   protected readonly query = signal('');
   protected readonly type = signal<SearchType>('ALL');
   protected readonly results = signal<TitleResult[]>([]);
@@ -121,6 +125,16 @@ export class CataloguePage {
   });
 
   constructor() {
+    effect(() => {
+      const fromUrl = this.q();
+      if (fromUrl) {
+        untracked(() => {
+          this.query.set(fromUrl);
+          this.type.set('ALL');
+          void this.finder.run();
+        });
+      }
+    });
     catalogueApi.branches().then((list) => this.branches.set(list)).catch(() => this.branches.set([]));
   }
 

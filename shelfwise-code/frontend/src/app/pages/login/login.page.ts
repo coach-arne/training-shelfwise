@@ -2,74 +2,72 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, inject, input, si
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { authApi } from '../../core/api/auth.api';
-import { DemoAccount } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
-import { ROLE_LABEL } from '../../helpers/labels';
-import { demoLogin, homeRoute, login } from '../../store/auth.store';
+import { homeRoute, login } from '../../store/auth.store';
 import { systemInfo } from '../../store/system.store';
+import { openTrainingKit } from '../../store/training-kit.store';
 import { ErrorMessage } from '../../shared/error-message';
+import { Icon } from '../../ui/icon';
 
-/** Log in with a staff user name or a member card number. In training mode the seed accounts can be picked directly. */
+/** Log in with a staff user name or a member card number. In training mode a quiet link opens the training kit. */
 @Component({
   selector: 'app-login-page',
-  imports: [FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, ErrorMessage],
+  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page">
-      <h1>Log in</h1>
-      @if (expired()) {
-        <div class="warning-box">Your session has ended. Please log in again.</div>
-      }
-      <mat-card class="login-card">
-        <mat-card-content>
-          <form (ngSubmit)="submit()" class="login-form">
-            <mat-form-field>
-              <mat-label>User name or card number</mat-label>
-              <input matInput name="username" [(ngModel)]="username" autocomplete="username" data-testid="username" required />
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Password</mat-label>
-              <input matInput type="password" name="password" [(ngModel)]="password" autocomplete="current-password" data-testid="password" required />
-            </mat-form-field>
-            <app-error-message [error]="signIn.error()" />
-            <button mat-flat-button type="submit" [disabled]="signIn.loading()" data-testid="login-submit">Log in</button>
-          </form>
-        </mat-card-content>
-      </mat-card>
+    <div class="login">
+      <aside class="brand-panel">
+        <app-icon name="library" [size]="36" />
+        <h1>Every book in its place.</h1>
+        <p>Shelfwise keeps the lending desks, the shelves and the member portals of the Northwick libraries in step.</p>
+      </aside>
 
-      @if (trainingMode() && accounts().length) {
-        <h2>Training accounts</h2>
-        <p>Training mode is on: pick an account to log in without a password. The password of every seed account is <code>shelfwise</code>.</p>
-        <h3>Staff</h3>
-        <div class="accounts">
-          @for (account of staffAccounts(); track account.id) {
-            <button mat-stroked-button (click)="pick(account)" [attr.data-testid]="'demo-' + account.username">
-              <strong>{{ account.username }}</strong> · {{ roleLabel(account) }}@if (account.branchCode) { · {{ account.branchCode }} }
-            </button>
-          }
-        </div>
-        <h3>Members</h3>
-        <div class="accounts">
-          @for (account of memberAccounts(); track account.id) {
-            <button mat-stroked-button (click)="pick(account)" [attr.data-testid]="'demo-' + account.username" class="member-button">
-              <strong>{{ account.scenario }} · {{ account.displayName }}</strong> ({{ account.username }})
-              <small>{{ account.description }}</small>
-            </button>
-          }
-        </div>
-      }
+      <section class="form-panel">
+        <h2>Welcome back</h2>
+        <p class="lead">Log in with your user name or library card number.</p>
+        @if (expired()) {
+          <div class="warning-box">Your session has ended. Please log in again.</div>
+        }
+        <form (ngSubmit)="submit()" class="login-form">
+          <mat-form-field appearance="outline">
+            <mat-label>User name or card number</mat-label>
+            <input matInput name="username" [(ngModel)]="username" autocomplete="username" data-testid="username" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" name="password" [(ngModel)]="password" autocomplete="current-password" data-testid="password" required />
+          </mat-form-field>
+          <app-error-message [error]="signIn.error()" />
+          <button mat-flat-button type="submit" [disabled]="signIn.loading()" data-testid="login-submit">Log in</button>
+        </form>
+        @if (trainingMode()) {
+          <button type="button" class="training-link" (click)="openAccounts()" data-testid="open-training-accounts">
+            <app-icon name="flask" [size]="16" /> Use a training account
+          </button>
+        }
+      </section>
     </div>
   `,
   styles: `
-    .login-card { max-width: 420px; }
-    .login-form { display: flex; flex-direction: column; gap: 8px; }
-    .accounts { display: flex; flex-wrap: wrap; gap: 8px; }
-    .member-button { height: auto; padding: 8px 12px; text-align: left; line-height: 1.3; }
-    .member-button small { display: block; max-width: 340px; white-space: normal; color: #607080; }
+    .login { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 980px; margin: var(--sw-space-7) auto; min-height: 520px;
+             border: 1px solid var(--sw-color-line); border-radius: var(--sw-radius-lg); overflow: hidden; background: var(--sw-color-surface); box-shadow: var(--sw-shadow-card); }
+    .brand-panel { display: flex; flex-direction: column; justify-content: flex-end; gap: var(--sw-space-3); padding: var(--sw-space-6);
+                   background: linear-gradient(160deg, var(--sw-color-accent) 0%, var(--sw-color-accent-strong) 100%); color: #f3f6f2; }
+    .brand-panel h1 { color: #fff; font-size: 38px; }
+    .brand-panel p { margin: 0; max-width: 34ch; color: rgba(255, 255, 255, 0.78); }
+    .form-panel { display: flex; flex-direction: column; justify-content: center; padding: var(--sw-space-6); }
+    .lead { margin: var(--sw-space-1) 0 var(--sw-space-4); color: var(--sw-color-muted); }
+    .login-form { display: flex; flex-direction: column; gap: var(--sw-space-1); }
+    .training-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin-top: var(--sw-space-5); padding: 0; border: 0; background: none;
+                     color: var(--sw-color-muted); font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .training-link:hover { color: var(--sw-color-accent); }
+    @media (max-width: 760px) {
+      .login { grid-template-columns: 1fr; margin: var(--sw-space-4); }
+      .brand-panel { padding: var(--sw-space-5); }
+      .brand-panel h1 { font-size: 28px; }
+    }
   `,
 })
 export class LoginPage {
@@ -79,30 +77,17 @@ export class LoginPage {
   protected readonly trainingMode = () => systemInfo()?.trainingMode ?? false;
   protected readonly username = signal('');
   protected readonly password = signal('');
-  protected readonly accounts = signal<DemoAccount[]>([]);
-  protected readonly staffAccounts = () => this.accounts().filter((a) => a.type === 'STAFF');
-  protected readonly memberAccounts = () => this.accounts().filter((a) => a.type === 'MEMBER');
-  protected readonly roleLabel = (account: DemoAccount) => ROLE_LABEL[account.role];
 
   protected readonly signIn = createAction(async () => {
     const user = await login(this.username().trim(), this.password());
     await this.router.navigateByUrl(homeRoute(user.role));
   });
 
-  private readonly demo = createAction(async (account: DemoAccount) => {
-    const user = await demoLogin(account.type, account.id);
-    await this.router.navigateByUrl(homeRoute(user.role));
-  });
-
-  constructor() {
-    authApi.demoAccounts().then((list) => this.accounts.set(list)).catch(() => this.accounts.set([]));
-  }
-
   protected submit(): void {
     void this.signIn.run();
   }
 
-  protected pick(account: DemoAccount): void {
-    void this.demo.run(account);
+  protected openAccounts(): void {
+    openTrainingKit('accounts');
   }
 }

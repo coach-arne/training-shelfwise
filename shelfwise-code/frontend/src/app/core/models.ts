@@ -54,6 +54,22 @@ export interface DemoAccount {
   description: string | null;
 }
 
+export interface DemoCopy {
+  barcode: string;
+  status: CopyStatus;
+  currentBranchCode: string;
+}
+
+/** An example book of the seed catalogue (training aid only). */
+export interface DemoBook {
+  titleId: number;
+  title: string;
+  authors: string;
+  isbn: string | null;
+  materialType: MaterialType;
+  copies: DemoCopy[];
+}
+
 // ----- members -----
 
 export interface BlockReason {

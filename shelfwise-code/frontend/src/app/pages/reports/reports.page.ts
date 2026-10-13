@@ -15,18 +15,20 @@ import { isMember, profile, role } from '../../store/auth.store';
 import { systemInfo } from '../../store/system.store';
 import { ErrorMessage } from '../../shared/error-message';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { SectionCard } from '../../ui/section-card';
+import { PageHeader } from '../../ui/page-header';
 
 /** R-01 daily circulation and R-02 overdue items (section 13) with CSV export. Librarians see their own branch. */
 @Component({
   selector: 'app-reports-page',
-  imports: [
+  imports: [PageHeader, SectionCard, 
     DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatTabsModule,
     ErrorMessage, MoneyPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Reports</h1>
+      <app-page-header eyebrow="Management" title="Reports" subtitle="Daily circulation and overdue items." />
       @if (isLibrarian()) {
         <p class="info">Showing your own branch ({{ ownBranch() }}).</p>
       } @else {
@@ -44,7 +46,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
 
       <mat-tab-group animationDuration="0ms">
         <mat-tab label="R-01 Daily circulation">
-          <div class="panel">
+          <app-section-card>
             <div class="row">
               <mat-form-field>
                 <mat-label>Date</mat-label>
@@ -65,10 +67,10 @@ import { MoneyPipe } from '../../shared/money.pipe';
                 </tbody>
               </table>
             }
-          </div>
+          </app-section-card>
         </mat-tab>
         <mat-tab label="R-02 Overdue items">
-          <div class="panel">
+          <app-section-card>
             <div class="row">
               <button mat-flat-button (click)="loadOverdue()" data-testid="r02-run">Show</button>
               <button mat-stroked-button (click)="exportOverdue()" data-testid="r02-csv">Download CSV</button>
@@ -89,12 +91,12 @@ import { MoneyPipe } from '../../shared/money.pipe';
                 </tbody>
               </table>
             }
-          </div>
+          </app-section-card>
         </mat-tab>
       </mat-tab-group>
     </div>
   `,
-  styles: `.info { color: #455a64; }`,
+  styles: `.info { color: var(--sw-color-muted); }`,
 })
 export class ReportsPage implements OnInit {
   protected readonly branches = signal<BranchView[]>([]);

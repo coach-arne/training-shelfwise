@@ -77,3 +77,7 @@ one place; the file and rule are named.
   is therefore annotated with `noRollbackFor = BusinessRuleException.class`. (Found by AC-MEM-04.)
 - The front-end uses Angular signals for state (module-level signals in `src/app/store`), plain functions for API calls
   and helpers, and Angular Material. Jotai was not used because the app is Angular.
+- The "Folio" design system (tokens in `frontend/src/styles`, primitives in `frontend/src/app/ui`) is a fictional house style
+  for this project. The business date stays visible in the header (F-TRN-01) as a small chip.
+- The "Training kit" (seed accounts and example books, `GET /api/demo/books`) is a training aid only and not a Shelfwise
+  feature. It is only available when `SHELFWISE_TRAINING_MODE=true`.

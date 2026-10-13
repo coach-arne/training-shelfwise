@@ -33,7 +33,7 @@ import { OutboxEntry } from '../../core/models';
       </table>
     }
   `,
-  styles: `.body { white-space: pre-wrap; font-family: inherit; background: #f5f7fa; padding: 8px; border-radius: 4px; }`,
+  styles: `.body { white-space: pre-wrap; font-family: inherit; background: var(--sw-color-sunken); padding: var(--sw-space-2); border-radius: var(--sw-radius-sm); }`,
 })
 export class OutboxTable {
   readonly entries = input.required<OutboxEntry[]>();

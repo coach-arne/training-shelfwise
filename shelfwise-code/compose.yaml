@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: shelfwise
       TZ: Europe/Brussels
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - shelfwise-db:/var/lib/postgresql/data
     healthcheck:

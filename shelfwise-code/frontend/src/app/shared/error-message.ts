@@ -17,7 +17,7 @@ import { errorText } from '../helpers/errors';
     }
   `,
   styles: `
-    .error { background: #fdecea; color: #7f1d1d; border-left: 4px solid #c62828; padding: 8px 12px; margin: 8px 0; border-radius: 4px; }
+    .error { background: var(--sw-color-danger-soft); color: var(--sw-color-danger); border: 1px solid color-mix(in srgb, var(--sw-color-danger) 25%, transparent); padding: var(--sw-space-3) var(--sw-space-4); margin: var(--sw-space-3) 0; border-radius: var(--sw-radius-sm); }
     .rule { margin-left: 8px; opacity: 0.7; }
   `,
 })

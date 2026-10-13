@@ -1,23 +1,19 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BlockStatus } from '../core/models';
+import { StatusPill } from '../ui/status-pill';
 
 /** Shows whether a member is blocked and why (F-MEM-06). */
 @Component({
   selector: 'app-blocked-badge',
-  imports: [MatChipsModule, MatTooltipModule],
+  imports: [MatTooltipModule, StatusPill],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (status().blocked) {
-      <mat-chip class="blocked" data-testid="blocked-badge" [matTooltip]="reasons()">Blocked</mat-chip>
+      <app-status-pill tone="danger" data-testid="blocked-badge" [matTooltip]="reasons()">Blocked</app-status-pill>
     } @else {
-      <mat-chip class="ok" data-testid="not-blocked-badge">Active</mat-chip>
+      <app-status-pill tone="success" data-testid="not-blocked-badge">Active</app-status-pill>
     }
-  `,
-  styles: `
-    .blocked { --mat-chip-label-text-color: #fff; --mat-chip-elevated-container-color: #c62828; }
-    .ok { --mat-chip-label-text-color: #fff; --mat-chip-elevated-container-color: #2e7d32; }
   `,
 })
 export class BlockedBadge {

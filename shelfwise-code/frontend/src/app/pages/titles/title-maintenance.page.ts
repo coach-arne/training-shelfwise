@@ -10,15 +10,17 @@ import { ErrorMessage } from '../../shared/error-message';
 import { TitleResultCard } from '../../shared/title-result-card';
 import { CopyAdmin } from './copy-admin';
 import { TitleForm } from './title-form';
+import { SectionCard } from '../../ui/section-card';
+import { PageHeader } from '../../ui/page-header';
 
 /** Maintain titles and copies (F-CAT-01, F-CAT-03). */
 @Component({
   selector: 'app-title-maintenance-page',
-  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, TitleResultCard, CopyAdmin, TitleForm],
+  imports: [PageHeader, SectionCard, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, TitleResultCard, CopyAdmin, TitleForm],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Titles &amp; copies</h1>
+      <app-page-header eyebrow="Staff" title="Titles &amp; copies" subtitle="Maintain the catalogue: titles, copies and their status." />
       <form class="row" (ngSubmit)="search()">
         <mat-form-field class="query">
           <mat-label>Search titles</mat-label>
@@ -30,10 +32,9 @@ import { TitleForm } from './title-form';
       <app-error-message [error]="finder.error()" />
 
       @if (creating()) {
-        <div class="panel">
-          <h2>New title</h2>
+        <app-section-card title="New title">
           <app-title-form (saved)="created($event)" (cancelled)="creating.set(false)" />
-        </div>
+        </app-section-card>
       }
 
       @for (title of results(); track title.id) {

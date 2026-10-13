@@ -1,0 +1,63 @@
+@use '@angular/material' as mat;
+
+// Angular Material, tuned to the Folio tokens.
+html {
+  @include mat.theme((
+    color: mat.$green-palette,
+    typography: (
+      plain-family: 'Inter Variable',
+      brand-family: 'Fraunces Variable',
+      bold-weight: 650,
+      medium-weight: 550,
+      regular-weight: 400,
+    ),
+    density: -1,
+  ));
+
+  // Re-point the Material system colours to the ink-green palette on warm paper.
+  --mat-sys-primary: var(--sw-color-accent);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--sw-color-accent-soft);
+  --mat-sys-on-primary-container: var(--sw-color-accent-strong);
+  --mat-sys-secondary-container: var(--sw-color-accent-soft);
+  --mat-sys-on-secondary-container: var(--sw-color-accent-strong);
+  --mat-sys-background: var(--sw-color-paper);
+  --mat-sys-surface: var(--sw-color-surface);
+  --mat-sys-surface-container-lowest: var(--sw-color-surface);
+  --mat-sys-surface-container-low: var(--sw-color-surface);
+  --mat-sys-surface-container: var(--sw-color-surface);
+  --mat-sys-surface-container-high: var(--sw-color-surface);
+  --mat-sys-surface-container-highest: var(--sw-color-sunken);
+  --mat-sys-on-surface: var(--sw-color-ink);
+  --mat-sys-on-surface-variant: var(--sw-color-muted);
+  --mat-sys-outline: var(--sw-color-line-strong);
+  --mat-sys-outline-variant: var(--sw-color-line);
+  --mat-sys-error: var(--sw-color-danger);
+
+  @include mat.button-overrides((
+    filled-container-shape: var(--sw-radius-pill),
+    outlined-container-shape: var(--sw-radius-pill),
+    text-container-shape: var(--sw-radius-pill),
+    protected-container-shape: var(--sw-radius-pill),
+  ));
+  @include mat.form-field-overrides((
+    outlined-container-shape: var(--sw-radius-sm),
+  ));
+  @include mat.card-overrides((
+    elevated-container-shape: var(--sw-radius-md),
+    outlined-container-shape: var(--sw-radius-md),
+  ));
+  @include mat.tabs-overrides((
+    active-indicator-height: 2px,
+    divider-color: var(--sw-color-line),
+  ));
+  @include mat.snack-bar-overrides((
+    container-shape: var(--sw-radius-sm),
+  ));
+  @include mat.dialog-overrides((
+    container-shape: var(--sw-radius-lg),
+  ));
+  @include mat.menu-overrides((
+    container-shape: var(--sw-radius-md),
+  ));
+}

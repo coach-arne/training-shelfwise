@@ -240,6 +240,22 @@ class ApiIT extends IntegrationTestBase {
     // ----- training -----
 
     @Test
+    @DisplayName("Training aid: the example books of the seed catalogue are listed with their copies, without logging in")
+    void demoBooks() throws Exception {
+        JsonNode books = api.read(api.perform(get("/api/demo/books")));
+        assertThat(books.isArray()).isTrue();
+        JsonNode lighthouse = null;
+        for (JsonNode book : books) {
+            if ("The Lighthouse Keeper's Atlas".equals(book.path("title").asText())) {
+                lighthouse = book;
+            }
+        }
+        assertThat(lighthouse).isNotNull();
+        assertThat(lighthouse.path("copies").size()).isPositive();
+        assertThat(lighthouse.path("copies").get(0).path("barcode").asText()).isNotBlank();
+    }
+
+    @Test
     @DisplayName("F-TRN-01/03 the business date moves forward with catch-up, never backward, and a reset restores the seed")
     void trainingBusinessDate() throws Exception {
         MvcResult backward = api.perform(api.jsonBody(api.as("admin", post("/api/training/business-date")),

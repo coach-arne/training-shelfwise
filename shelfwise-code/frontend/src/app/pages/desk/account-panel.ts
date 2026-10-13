@@ -14,11 +14,12 @@ import { notifySuccess } from '../../store/notify.store';
 import { ChargeHistoryTable } from '../../shared/charge-history-table';
 import { ErrorMessage } from '../../shared/error-message';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { SectionCard } from '../../ui/section-card';
 
 /** Charges, desk payment (F-PAY-01) and waivers (F-FIN-10) of the member. */
 @Component({
   selector: 'app-account-panel',
-  imports: [
+  imports: [SectionCard, 
     FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, ChargeHistoryTable,
     ErrorMessage, MoneyPipe,
   ],
@@ -33,7 +34,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
       <app-charge-history-table [charges]="account.charges" [waivable]="true" (waive)="startWaiver($event)" />
 
       @if (waiving(); as charge) {
-        <div class="panel" data-testid="waiver-form">
+        <app-section-card data-testid="waiver-form">
           <h3>Waive part of: {{ typeLabel(charge) }} ({{ charge.outstandingAmount | money }} outstanding)</h3>
           @if (!isManager) {
             <p><small>A librarian can waive at most € 2.00 per charge in total; a branch manager can waive more.</small></p>
@@ -51,7 +52,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
             <button mat-button (click)="waiving.set(null)">Cancel</button>
           </div>
           <app-error-message [error]="waiver.error()" />
-        </div>
+        </app-section-card>
       }
 
       @if (account.balance > 0) {
@@ -87,7 +88,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
     }
   `,
   styles: `
-    .blocked { color: #c62828; }
+    .blocked { color: var(--sw-color-danger); }
     .reason { min-width: 280px; }
   `,
 })

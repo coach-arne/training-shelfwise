@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, input, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
 import { providerApi } from '../../core/api/portal.api';
 import { OnlinePaymentView, ProviderResult } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
 import { ErrorMessage } from '../../shared/error-message';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { PageHeader } from '../../ui/page-header';
+import { SectionCard } from '../../ui/section-card';
 
 /**
  * The simulated payment provider (F-TRN-05): the training stand-in for the bank's payment page.
@@ -14,16 +15,12 @@ import { MoneyPipe } from '../../shared/money.pipe';
  */
 @Component({
   selector: 'app-payment-provider-page',
-  imports: [MatButtonModule, MatCardModule, RouterLink, ErrorMessage, MoneyPipe],
+  imports: [MatButtonModule, RouterLink, ErrorMessage, MoneyPipe, PageHeader, SectionCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page narrow">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Simulated payment provider</mat-card-title>
-          <mat-card-subtitle>Training environment – no real money is moved</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
+      <app-page-header eyebrow="Training environment" title="Simulated payment provider" subtitle="No real money is moved. Choose how the payment ends." />
+      <app-section-card>
           <app-error-message [error]="loader.error() ?? reporter.error()" />
           @if (payment(); as payment) {
             <p class="amount" data-testid="provider-amount">Amount to pay: <strong>{{ payment.amount | money }}</strong></p>
@@ -40,13 +37,12 @@ import { MoneyPipe } from '../../shared/money.pipe';
               <a mat-flat-button routerLink="/portal" data-testid="back-to-portal">Back to my library</a>
             }
           }
-        </mat-card-content>
-      </mat-card>
+      </app-section-card>
     </div>
   `,
   styles: `
     .narrow { max-width: 560px; }
-    .amount { font-size: 20px; }
+    .amount { font-size: 20px; margin-top: 0; }
     .choices { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
   `,
 })

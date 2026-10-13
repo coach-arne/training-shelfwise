@@ -16,19 +16,19 @@ import { selectMember } from '../../store/member-context.store';
 import { systemInfo } from '../../store/system.store';
 import { ErrorMessage } from '../../shared/error-message';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { PageHeader } from '../../ui/page-header';
 
 /** Register a new member at the desk (F-MEM-02): duplicate warning, guardian for a YOUTH, fee payment. */
 @Component({
   selector: 'app-register-member-page',
-  imports: [
+  imports: [PageHeader, 
     DatePipe, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     ErrorMessage, MoneyPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Register a member</h1>
-      <p><small>Check an identity document first. The membership is valid for 12 months from today.</small></p>
+      <app-page-header eyebrow="Staff" title="Register a member" subtitle="Check an identity document first. The membership is valid for 12 months from today." />
 
       @if (result(); as result) {
         <div class="success-box" data-testid="registration-result">
@@ -109,8 +109,8 @@ import { MoneyPipe } from '../../shared/money.pipe';
   styles: `
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 4px 16px; align-items: center; }
     .full { grid-column: 1 / -1; }
-    .info { background: #eef2f7; padding: 8px 12px; border-radius: 4px; }
-    .or { text-align: center; color: #607080; }
+    .info { background: var(--sw-color-info-soft); color: var(--sw-color-info); padding: var(--sw-space-2) var(--sw-space-3); border-radius: var(--sw-radius-sm); }
+    .or { text-align: center; color: var(--sw-color-muted); }
   `,
 })
 export class RegisterMemberPage {

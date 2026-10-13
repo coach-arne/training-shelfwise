@@ -14,19 +14,21 @@ import { ErrorMessage } from '../../shared/error-message';
 import { useConfirm } from '../../shared/confirm-dialog';
 import { OutboxTable } from './outbox-table';
 import { ProcessingSummary } from './processing-summary';
+import { SectionCard } from '../../ui/section-card';
+import { PageHeader } from '../../ui/page-header';
 
 /** Training support (section 15): business date, daily processing, reset to seed data and the notification outbox. */
 @Component({
   selector: 'app-training-page',
-  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatTabsModule, ErrorMessage, OutboxTable, ProcessingSummary],
+  imports: [PageHeader, SectionCard, DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatTabsModule, ErrorMessage, OutboxTable, ProcessingSummary],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Training</h1>
+      <app-page-header eyebrow="Administrator" title="Training" subtitle="Move the business date, run the daily processing and reset the seed data." />
       <div class="warning-box">Training mode is on. These functions change the shared training data.</div>
       <app-error-message [error]="loader.error() ?? mover.error() ?? runner.error() ?? resetter.error()" />
       @if (state(); as state) {
-        <div class="panel">
+        <app-section-card>
           <p>Business date: <strong data-testid="training-business-date">{{ state.businessDate | date: 'EEE d MMM yyyy' }}</strong>
             · Daily processing last ran for: <strong data-testid="training-last-processed">{{ state.lastProcessedDate | date: 'EEE d MMM yyyy' }}</strong></p>
           <div class="row">
@@ -41,7 +43,7 @@ import { ProcessingSummary } from './processing-summary';
           </div>
           <p><small>The business date can only move forward. Moving it forward runs the daily processing of every day before it, in date order.
             To go back, reset to the seed data (Monday 16 March 2026).</small></p>
-        </div>
+        </app-section-card>
         @if (summary(); as summary) {
           <app-processing-summary [summary]="summary" />
         }

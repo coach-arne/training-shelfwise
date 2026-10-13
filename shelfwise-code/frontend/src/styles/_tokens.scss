@@ -1,0 +1,48 @@
+// Folio design tokens: the single source of truth for colour, space, shape and type.
+:root {
+  --sw-color-paper: #f7f4ee;
+  --sw-color-surface: #fffdf9;
+  --sw-color-sunken: #f1ede4;
+  --sw-color-ink: #1f2a24;
+  --sw-color-muted: #6b7468;
+  --sw-color-line: #e6e0d4;
+  --sw-color-line-strong: #d3cbb9;
+
+  --sw-color-accent: #2f5d50;
+  --sw-color-accent-strong: #24493f;
+  --sw-color-accent-soft: #e3ece7;
+
+  --sw-color-success: #2f6b45;
+  --sw-color-success-soft: #e2efe5;
+  --sw-color-warning: #8a5a00;
+  --sw-color-warning-accent: #d08a1e;
+  --sw-color-warning-soft: #faefd2;
+  --sw-color-danger: #a23a2c;
+  --sw-color-danger-soft: #f8e4df;
+  --sw-color-info: #2d5a85;
+  --sw-color-info-soft: #e1ebf4;
+  --sw-color-neutral: #5d6559;
+  --sw-color-neutral-soft: #ebe7dd;
+
+  --sw-space-1: 4px;
+  --sw-space-2: 8px;
+  --sw-space-3: 12px;
+  --sw-space-4: 16px;
+  --sw-space-5: 24px;
+  --sw-space-6: 32px;
+  --sw-space-7: 48px;
+
+  --sw-radius-sm: 8px;
+  --sw-radius-md: 14px;
+  --sw-radius-lg: 20px;
+  --sw-radius-pill: 999px;
+
+  --sw-shadow-card: 0 1px 2px rgba(31, 42, 36, 0.05), 0 4px 16px rgba(31, 42, 36, 0.05);
+  --sw-shadow-float: 0 8px 32px rgba(31, 42, 36, 0.18);
+
+  --sw-font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sw-font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --sw-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --sw-page-width: 1180px;
+}

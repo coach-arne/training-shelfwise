@@ -6,24 +6,26 @@ import { MatInputModule } from '@angular/material/input';
 import { deskApi } from '../../core/api/desk.api';
 import { ArrivalReceipt, ReturnReceipt } from '../../core/models';
 import { createAction } from '../../helpers/async-action';
+import { fillFromPickedBarcode } from '../../helpers/picked-barcode';
 import { ROUTING_LABEL } from '../../helpers/labels';
 import { ErrorMessage } from '../../shared/error-message';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { SectionCard } from '../../ui/section-card';
+import { PageHeader } from '../../ui/page-header';
 
 /** Returns (F-LEN-05) and arrival check-in of transferred copies (F-LEN-06). The result says where the copy goes. */
 @Component({
   selector: 'app-returns-page',
-  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, MoneyPipe],
+  imports: [PageHeader, SectionCard, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, MoneyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>Returns</h1>
-      <div class="panel">
-        <h2>Return a copy</h2>
+      <app-page-header eyebrow="Staff" title="Returns" subtitle="Scan a barcode to return a copy or to check in an arriving copy." />
+      <app-section-card title="Return a copy">
         <form class="row" (ngSubmit)="returnCopy()">
           <mat-form-field>
             <mat-label>Copy barcode</mat-label>
-            <input matInput name="barcode" [ngModel]="barcode()" (ngModelChange)="barcode.set($event)" data-testid="return-barcode" />
+            <input matInput name="barcode" [value]="barcode()" (input)="barcode.set($any($event.target).value)" data-testid="return-barcode" />
           </mat-form-field>
           <button mat-flat-button type="submit" [disabled]="!barcode().trim() || returner.loading()" data-testid="return-submit">Return</button>
         </form>
@@ -39,15 +41,14 @@ import { MoneyPipe } from '../../shared/money.pipe';
             <p class="routing" data-testid="return-routing">{{ routing(receipt.routing.outcome) }}@if (receipt.routing.destinationBranchCode) { : {{ receipt.routing.destinationBranchCode }} }</p>
           </div>
         }
-      </div>
+      </app-section-card>
 
-      <div class="panel">
-        <h2>Check in an arriving copy</h2>
+      <app-section-card title="Check in an arriving copy">
         <p><small>For copies that were sent from another branch.</small></p>
         <form class="row" (ngSubmit)="arrive()">
           <mat-form-field>
             <mat-label>Copy barcode</mat-label>
-            <input matInput name="arrival" [ngModel]="arrivalBarcode()" (ngModelChange)="arrivalBarcode.set($event)" data-testid="arrival-barcode" />
+            <input matInput name="arrival" [value]="arrivalBarcode()" (input)="arrivalBarcode.set($any($event.target).value)" data-testid="arrival-barcode" />
           </mat-form-field>
           <button mat-flat-button type="submit" [disabled]="!arrivalBarcode().trim() || arriver.loading()" data-testid="arrival-submit">Check in</button>
         </form>
@@ -57,10 +58,10 @@ import { MoneyPipe } from '../../shared/money.pipe';
             <strong>{{ receipt.title }}</strong> ({{ receipt.barcode }}): {{ receipt.message }}
           </div>
         }
-      </div>
+      </app-section-card>
     </div>
   `,
-  styles: `.routing { font-size: 18px; font-weight: 500; margin: 4px 0 0; } .fine { color: #7f1d1d; }`,
+  styles: `.routing { font-family: var(--sw-font-display); font-size: 20px; font-weight: 600; margin: 4px 0 0; } .fine { color: var(--sw-color-danger); }`,
 })
 export class ReturnsPage {
   protected readonly barcode = signal('');
@@ -68,6 +69,10 @@ export class ReturnsPage {
   protected readonly returned = signal<ReturnReceipt | null>(null);
   protected readonly arrived = signal<ArrivalReceipt | null>(null);
   protected readonly routing = (outcome: keyof typeof ROUTING_LABEL) => ROUTING_LABEL[outcome];
+
+  constructor() {
+    fillFromPickedBarcode(this.barcode);
+  }
 
   protected readonly returner = createAction(async () => {
     this.returned.set(null);

@@ -3,10 +3,12 @@ import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ReservationView } from '../core/models';
 import { RESERVATION_STATUS_LABEL } from '../helpers/labels';
+import { RESERVATION_STATUS_TONE } from '../helpers/tones';
+import { StatusPill } from '../ui/status-pill';
 
 @Component({
   selector: 'app-reservation-table',
-  imports: [DatePipe, MatButtonModule],
+  imports: [DatePipe, MatButtonModule, StatusPill],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (reservations().length === 0) {
@@ -22,7 +24,7 @@ import { RESERVATION_STATUS_LABEL } from '../helpers/labels';
               <td>{{ reservation.title }}</td>
               <td>{{ reservation.pickupBranchCode }}</td>
               <td>
-                {{ statusLabel(reservation) }}
+                <app-status-pill [tone]="tone(reservation)">{{ statusLabel(reservation) }}</app-status-pill>
                 @if (reservation.cancelledByLibrary) { <small>(by the library)</small> }
               </td>
               <td>{{ reservation.queuePosition ?? '' }}</td>
@@ -42,6 +44,10 @@ import { RESERVATION_STATUS_LABEL } from '../helpers/labels';
 export class ReservationTable {
   readonly reservations = input.required<ReservationView[]>();
   readonly cancel = output<ReservationView>();
+
+  protected tone(reservation: ReservationView) {
+    return RESERVATION_STATUS_TONE[reservation.status];
+  }
 
   protected statusLabel(reservation: ReservationView): string {
     return RESERVATION_STATUS_LABEL[reservation.status];

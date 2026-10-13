@@ -16,41 +16,43 @@ import { MemberCard } from '../../shared/member-card';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { ReservationTable } from '../../shared/reservation-table';
 import { PreferencesForm } from './preferences-form';
+import { SectionCard } from '../../ui/section-card';
+import { PageHeader } from '../../ui/page-header';
 
 /** The member portal (F-MEM-07): loans, reservations, charges with online payment, and contact preferences. */
 @Component({
   selector: 'app-portal-page',
-  imports: [
+  imports: [PageHeader, SectionCard, 
     MatButtonModule, MatTabsModule, RouterLink, ChargeHistoryTable, ErrorMessage, LoanTable, MemberCard, MoneyPipe,
     PreferencesForm, ReservationTable,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page">
-      <h1>My library</h1>
+      <app-page-header eyebrow="Member portal" title="My library" subtitle="Your loans, reservations and account in one place." />
       <app-error-message [error]="loader.error() ?? actions.error()" />
       @if (member(); as member) {
         <app-member-card [member]="member" />
         <mat-tab-group animationDuration="0ms">
           <mat-tab label="Loans ({{ loans().length }})">
-            <div class="panel">
+            <app-section-card>
               <app-loan-table [loans]="loans()" [busyLoanId]="busyLoanId()" (renew)="renew($event)"
                               emptyText="You have no loans at the moment." />
-            </div>
+            </app-section-card>
             <h2>Loan history</h2>
-            <div class="panel">
+            <app-section-card>
               <p><small>Your history is anonymised 12 months after return unless you choose to keep it (see Profile).</small></p>
               <app-loan-table [loans]="history()" [showRenew]="false" [showReturn]="true" emptyText="No history." />
-            </div>
+            </app-section-card>
           </mat-tab>
           <mat-tab label="Reservations ({{ reservations().length }})">
-            <div class="panel">
+            <app-section-card>
               <app-reservation-table [reservations]="reservations()" (cancel)="cancelReservation($event)" />
               <p><a mat-stroked-button routerLink="/catalogue">Find a title to reserve</a></p>
-            </div>
+            </app-section-card>
           </mat-tab>
           <mat-tab label="Account">
-            <div class="panel">
+            <app-section-card>
               @if (account(); as account) {
                 <p>Balance: <strong data-testid="portal-balance">{{ account.balance | money }}</strong>
                   @if (account.blocked) { <span class="blocked"> – your account is blocked</span> }
@@ -63,19 +65,19 @@ import { PreferencesForm } from './preferences-form';
                           data-testid="pay-all">Pay full balance online</button>
                 </div>
               }
-            </div>
+            </app-section-card>
           </mat-tab>
           <mat-tab label="Profile">
-            <div class="panel">
+            <app-section-card>
               <app-preferences-form [member]="member" />
-            </div>
+            </app-section-card>
           </mat-tab>
         </mat-tab-group>
       }
     </div>
   `,
   styles: `
-    .blocked { color: #c62828; }
+    .blocked { color: var(--sw-color-danger); }
     .pay-row { margin-top: 12px; }
   `,
 })

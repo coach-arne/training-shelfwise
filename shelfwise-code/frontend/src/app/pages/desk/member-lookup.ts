@@ -10,13 +10,14 @@ import { createAction } from '../../helpers/async-action';
 import { CATEGORY_LABEL } from '../../helpers/labels';
 import { selectMember } from '../../store/member-context.store';
 import { ErrorMessage } from '../../shared/error-message';
+import { StatusPill } from '../../ui/status-pill';
 
 const CARD_NUMBER = /^NPL\d+$/i;
 
 /** Find a member by card number, name, or e-mail address and open the member at the desk. */
 @Component({
   selector: 'app-member-lookup',
-  imports: [FormsModule, DatePipe, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage],
+  imports: [FormsModule, DatePipe, MatButtonModule, MatFormFieldModule, MatInputModule, ErrorMessage, StatusPill],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form class="row" (ngSubmit)="search()">
@@ -33,8 +34,8 @@ const CARD_NUMBER = /^NPL\d+$/i;
         <tbody>
           @for (member of results(); track member.id) {
             <tr>
-              <td>{{ member.cardNumber }}</td>
-              <td>{{ member.fullName }} @if (member.blocked) { <strong class="blocked">blocked</strong> }</td>
+              <td class="mono">{{ member.cardNumber }}</td>
+              <td>{{ member.fullName }} @if (member.blocked) { <app-status-pill tone="danger">Blocked</app-status-pill> }</td>
               <td>{{ member.birthDate | date: 'dd MMM yyyy' }}</td>
               <td>{{ category(member) }}</td>
               <td><button mat-stroked-button (click)="open(member.id)" [attr.data-testid]="'open-member-' + member.cardNumber">Open</button></td>
@@ -46,7 +47,6 @@ const CARD_NUMBER = /^NPL\d+$/i;
   `,
   styles: `
     .query { min-width: 320px; }
-    .blocked { color: #c62828; margin-left: 6px; }
   `,
 })
 export class MemberLookup {
