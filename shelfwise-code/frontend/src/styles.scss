@@ -1,0 +1,32 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f5f7fa; color: #1f2933; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.page h1 { font-weight: 500; margin: 8px 0 16px; }
+.page h2 { font-weight: 500; margin: 24px 0 8px; font-size: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; }
+.row > mat-form-field { min-width: 200px; }
+.spacer { flex: 1 1 auto; }
+.empty { color: #607080; font-style: italic; }
+.panel { background: #fff; border-radius: 8px; padding: 16px; margin: 12px 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+.success-box { background: #e8f5e9; color: #1b5e20; border-left: 4px solid #2e7d32; padding: 8px 12px; margin: 8px 0; border-radius: 4px; }
+.warning-box { background: #fff8e1; color: #6d4c00; border-left: 4px solid #f9a825; padding: 8px 12px; margin: 8px 0; border-radius: 4px; }
+
+.data-table { width: 100%; border-collapse: collapse; background: #fff; }
+.data-table th { text-align: left; font-size: 12px; text-transform: uppercase; color: #607080; padding: 8px; border-bottom: 2px solid #dde3ea; }
+.data-table td { padding: 8px; border-bottom: 1px solid #edf1f5; vertical-align: top; }
+.data-table .num { text-align: right; white-space: nowrap; }
+.data-table tr.muted td { color: #8a97a5; }
+
+.snack-error { --mat-snack-bar-container-color: #b71c1c; --mat-snack-bar-supporting-text-color: #fff; --mat-snack-bar-button-color: #fff; }
+.snack-success { --mat-snack-bar-container-color: #1b5e20; --mat-snack-bar-supporting-text-color: #fff; --mat-snack-bar-button-color: #fff; }

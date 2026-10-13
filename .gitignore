@@ -1,0 +1,7 @@
+shelfwise-code/backend/target/
+shelfwise-code/frontend/node_modules/
+shelfwise-code/frontend/dist/
+shelfwise-code/frontend/.angular/
+shelfwise-code/.idea/
+shelfwise-code/*.iml
+shelfwise-code/.DS_Store
